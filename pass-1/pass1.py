@@ -68,3 +68,9 @@ for line in sicFile:
         intermediateFile.write(line)
         if opCode == "END":
             intermediateFile.write("\n")
+
+        # from 18 to 35 -> operand
+        operand = line[16:35].strip()
+        if startCounter > 1:
+            error = "The program must contain only one START directive"
+            flagErrors(error, "withoutLine", lineNumber)
