@@ -1,5 +1,6 @@
 import sys
 import os
+import math
 
 sicFile = open(sys.argv[1], "r")  # Open assembly code file for reading
 intermediateFile = open(sys.argv[2], "w")  # Open the mediator file for writing
@@ -10,7 +11,7 @@ os.system("cls")
 SYBTAB = {}
 lineNumber = 0
 LOCCTR = "0"  # HEX
-isStart = False
+isSTART = False
 labelMap = {}
 startAddress = "0"  # HEX
 isFirstLine = True
@@ -53,7 +54,7 @@ for line in sicFile:
                 error = "The program must begin with START directive"
                 flagErrors(error, "withoutLine", lineNumber)
         if opCode == "START":
-            isStart = True
+            isSTART = True
             startCounter += 1
         elif opCode == "BYTE":
             isBYTE = True
@@ -74,3 +75,25 @@ for line in sicFile:
         if startCounter > 1:
             error = "The program must contain only one START directive"
             flagErrors(error, "withoutLine", lineNumber)
+
+        if isSTART:
+            startAddress = operand
+            LOCCTR = startAddress
+            PROGNAME = label
+            isSTART = False
+            continue
+        elif isBYTE:
+            value = operand[2 : len(operand) - 1]
+            # C' ' -> c' : [0] [1], this mean why start from 2
+            conv = ""
+            if operand == "":
+                error = "Directive " + opCode + " need an operand\n"
+                flagErrors(error, "withLine", lineNumber)
+            elif operand.startswith("C"):
+                for ch in value:
+                    conv = hex(ord(ch)).lstrip("0x")
+            elif operand.startswith("X"):
+                conv = value
+            else:
+                conv = hex(int(operand, 16)).lstrip("0x")
+            instructionSize = hex(math.ceil(len(conv) / 2)).lstrip("0x")
