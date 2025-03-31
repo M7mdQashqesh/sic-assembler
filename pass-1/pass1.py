@@ -126,6 +126,22 @@ for line in sicFile:
             length = math.ceil(len(convertedValue) / 2)
             if length > 3:
                 error = "Directive " + opCode + " can reserve only one word (3 BYTE)\n"
-                flagErrors(error,"withLine", lineNumber)
+                flagErrors(error, "withLine", lineNumber)
             instructionSize = "3"
         # ? ========{WORD directive}========
+
+        # ? ========{RESB directive}========
+        elif isRESB:
+            if operand == "":
+                error = "Directive " + opCode + " need an operand\n"
+                flagErrors(error, "withLine", lineNumber)
+            instructionSize = hex(int(operand)).lstrip("0x")
+        # ? ========{RESB directive}========
+
+        # ? ========{RESW directive}========
+        elif isRESW:
+            if operand == "":
+                error = "Directive " + opCode + " need an operand\n"
+                flagErrors(error, "withLine", lineNumber)
+            instructionSize = hex(int(operand) * 3).lstrip("0x")
+        # ? ========{RESW directive}========
