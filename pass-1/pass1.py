@@ -40,12 +40,15 @@ for line in sicFile:
         continue
 
     else:
+        # ? ========{LABEL}========
         # from 1 to 7 -> LABEL
         label = line[0:8].strip()
         if labelMap.get(label) != None:
             error = "Symbol " + str(label) + " already exist in symbol table\n"
             flagErrors(error, "withLine", lineNumber)
+        # ? ========{LABEL}========
 
+        # ? ========{OPCODE}========
         # from 10 to 15 -> opcode
         opCode = line[9:15].strip()
         if isFirstLine == True:
@@ -69,31 +72,60 @@ for line in sicFile:
         intermediateFile.write(line)
         if opCode == "END":
             intermediateFile.write("\n")
+        # ? ========{OPCODE}========
 
+        # ? ========{OPERAND}========
         # from 18 to 35 -> operand
         operand = line[16:35].strip()
         if startCounter > 1:
             error = "The program must contain only one START directive"
             flagErrors(error, "withoutLine", lineNumber)
+        # ? ========{OPERAND}========
 
+        # ? ========{START directive}========
         if isSTART:
             startAddress = operand
             LOCCTR = startAddress
             PROGNAME = label
             isSTART = False
             continue
+        # ? ========{START directive}========
+
+        # ? ========{BYTE directive}========
         elif isBYTE:
             value = operand[2 : len(operand) - 1]
             # C' ' -> c' : [0] [1], this mean why start from 2
-            conv = ""
+            convertedValue = ""
             if operand == "":
                 error = "Directive " + opCode + " need an operand\n"
                 flagErrors(error, "withLine", lineNumber)
             elif operand.startswith("C"):
                 for ch in value:
-                    conv = hex(ord(ch)).lstrip("0x")
+                    convertedValue += hex(ord(ch)).lstrip("0x")
             elif operand.startswith("X"):
-                conv = value
+                convertedValue = value
             else:
-                conv = hex(int(operand, 16)).lstrip("0x")
-            instructionSize = hex(math.ceil(len(conv) / 2)).lstrip("0x")
+                convertedValue = hex(int(operand, 16)).lstrip("0x")
+            instructionSize = hex(math.ceil(len(convertedValue) / 2)).lstrip("0x")
+        # ? ========{BYTE directive}========
+
+        # ? ========{WORD directive}========
+        elif isWORD:
+            value = operand[2 : len(operand) - 1]
+            convertedValue = ""
+            if operand == "":
+                error = "Directive " + opCode + " need an operand\n"
+                flagErrors(error, "withLine", lineNumber)
+            elif operand.startswith("C"):
+                for ch in value:
+                    convertedValue += hex(ord(ch)).lstrip("0x")
+            elif operand.startswith("X"):
+                convertedValue = value
+            else:
+                convertedValue = hex(int(operand, 16)).lstrip("0x")
+            length = math.ceil(len(convertedValue) / 2)
+            if length > 3:
+                error = "Directive " + opCode + " can reserve only one word (3 BYTE)\n"
+                flagErrors(error,"withLine", lineNumber)
+            instructionSize = "3"
+        # ? ========{WORD directive}========
