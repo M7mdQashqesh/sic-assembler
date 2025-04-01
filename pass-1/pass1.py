@@ -70,6 +70,7 @@ for line in sicFile:
 
         # write the line on list file
         intermediateFile.write(line)
+
         if opCode == "END":
             intermediateFile.write("\n")
         # ? ========{OPCODE}========
@@ -84,9 +85,9 @@ for line in sicFile:
 
         # ? ========{START directive}========
         if isSTART:
-            startAddress = operand
+            startAddress = operand.upper()
             LOCCTR = startAddress
-            PROGNAME = label
+            PRGNAME = label
             isSTART = False
             continue
         # ? ========{START directive}========
@@ -101,12 +102,14 @@ for line in sicFile:
                 flagErrors(error, "withLine", lineNumber)
             elif operand.startswith("C"):
                 for ch in value:
-                    convertedValue += hex(ord(ch)).lstrip("0x")
+                    convertedValue += hex(ord(ch)).lstrip("0x").upper()
             elif operand.startswith("X"):
-                convertedValue = value
+                convertedValue = value.upper()
             else:
-                convertedValue = hex(int(operand, 16)).lstrip("0x")
-            instructionSize = hex(math.ceil(len(convertedValue) / 2)).lstrip("0x")
+                convertedValue = hex(int(operand, 16)).lstrip("0x").upper()
+            instructionSize = (
+                hex(math.ceil(len(convertedValue) / 2)).lstrip("0x").upper()
+            )
         # ? ========{BYTE directive}========
 
         # ? ========{WORD directive}========
@@ -118,11 +121,11 @@ for line in sicFile:
                 flagErrors(error, "withLine", lineNumber)
             elif operand.startswith("C"):
                 for ch in value:
-                    convertedValue += hex(ord(ch)).lstrip("0x")
+                    convertedValue += hex(ord(ch)).lstrip("0x").upper()
             elif operand.startswith("X"):
-                convertedValue = value
+                convertedValue = value.upper()
             else:
-                convertedValue = hex(int(operand, 16)).lstrip("0x")
+                convertedValue = hex(int(operand, 16)).lstrip("0x").upper()
             length = math.ceil(len(convertedValue) / 2)
             if length > 3:
                 error = "Directive " + opCode + " can reserve only one word (3 BYTE)\n"
@@ -135,7 +138,7 @@ for line in sicFile:
             if operand == "":
                 error = "Directive " + opCode + " need an operand\n"
                 flagErrors(error, "withLine", lineNumber)
-            instructionSize = hex(int(operand)).lstrip("0x")
+            instructionSize = hex(int(operand)).lstrip("0x").upper()
         # ? ========{RESB directive}========
 
         # ? ========{RESW directive}========
@@ -143,5 +146,48 @@ for line in sicFile:
             if operand == "":
                 error = "Directive " + opCode + " need an operand\n"
                 flagErrors(error, "withLine", lineNumber)
-            instructionSize = hex(int(operand) * 3).lstrip("0x")
+            instructionSize = hex(int(operand) * 3).lstrip("0x").upper()
         # ? ========{RESW directive}========
+
+        if label != "":
+            temp = hex(int(LOCCTR, 16)).lstrip("0x").upper()
+            SYBTAB[label] = ("0" * (4 - len(temp))) + temp
+            labelMap[label] = 1
+        LOCCTR = hex(int(LOCCTR, 16) + int(instructionSize, 16)).lstrip("0x").upper()
+
+sicFile.close()
+intermediateFile.close()
+
+PRGLTH = hex(int(LOCCTR, 16) - int(startAddress, 16)).lstrip("0x").upper()
+
+whiteBold = "\033[1;37m"
+blueLight = "\033[1;38;5;85m"
+tableBorder = blueLight + "||" + whiteBold
+
+print(whiteBold + "\n\tTHE PROGRAM PASSED PASS1 SUCCESSFULLY!!\n\n\tOUTPUT OF PASS 1:")
+
+print("\t\t Program Name : " + blueLight + PRGNAME + whiteBold)
+print("\t\t Program Length : " + blueLight + PRGLTH + whiteBold)
+print("\t\t SYMBOL TABLE : ")
+print(blueLight + "\t\t==================================================" + whiteBold)
+sys.stdout.write(
+    "\t\t"
+    + "%-2s %-20s %-2s %-20s %-2s\n"
+    % (tableBorder, "SYMBOL", tableBorder, "ADDRESS", tableBorder)
+)
+
+print(blueLight + "\t\t==================================================" + whiteBold)
+for sym in SYBTAB:
+    sys.stdout.write(
+        "\t\t"
+        + "%-2s %-20s %-2s %-20s %-2s\n"
+        % (tableBorder, str(sym), tableBorder, str(SYBTAB[sym]), tableBorder)
+    )
+print(blueLight + "\t\t==================================================" + whiteBold)
+
+OutputFile.write('ProgramName = "' + str(PRGNAME) + '"\n')
+OutputFile.write('ProgramLength = "' + str(PRGLTH) + '"\n')
+OutputFile.write('StartAddress = "' + str(startAddress) + '"\n')
+OutputFile.write("SymbolTable = " + str(SYBTAB) + "\n")
+
+OutputFile.close()
