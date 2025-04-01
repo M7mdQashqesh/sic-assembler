@@ -41,16 +41,16 @@ for line in sicFile:
 
     else:
         # ? ========{LABEL}========
-        # from 1 to 7 -> LABEL
-        label = line[0:8].strip()
+        # from 1 to 10 -> LABEL
+        label = line[0:10].strip()
         if labelMap.get(label) != None:
             error = "Symbol " + str(label) + " already exist in symbol table\n"
             flagErrors(error, "withLine", lineNumber)
         # ? ========{LABEL}========
 
         # ? ========{OPCODE}========
-        # from 10 to 15 -> opcode
-        opCode = line[9:15].strip()
+        # from 12 to 20 -> opcode
+        opCode = line[11:20].strip()
         if isFirstLine == True:
             isFirstLine = False
             if opCode != "START":
@@ -76,8 +76,8 @@ for line in sicFile:
         # ? ========{OPCODE}========
 
         # ? ========{OPERAND}========
-        # from 18 to 35 -> operand
-        operand = line[16:35].strip()
+        # from 22 to 39 -> operand
+        operand = line[21:39].strip()
         if startCounter > 1:
             error = "The program must contain only one START directive"
             flagErrors(error, "withoutLine", lineNumber)
