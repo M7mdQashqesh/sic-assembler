@@ -69,14 +69,30 @@ for line in sicFile:
             isRESW = True
 
         if opCode != "START":
-            # Write the formatted line without comments into intermediate file
-            intermediateFile.write(f"{LOCCTR.zfill(4)}  {line[:40]}\n")
-        else:
-            # Don't write LOCCTR for START
-            intermediateFile.write("      " + line[:40] + "\n")
+            # ? ========{COMMENTS}========
+            if len(line) > 39:
+                comment = line[40:].strip()  # استخراج التعليق بعد المسافة
+                line = line[:40].rstrip()  # إزالة التعليق، أخذ الجزء قبل 40
+            else:
+                comment = ""
 
-        if opCode == "END":
-            intermediateFile.write("\n")
+            if comment:
+                intermediateFile.write(f"{LOCCTR.zfill(4)} {line}\n")
+            else:
+                intermediateFile.write(f"{LOCCTR.zfill(4)} {line}")
+
+            # ? ========{COMMENTS}========
+        else:
+            if len(line) > 39:
+                comment = line[40:].strip()  # استخراج التعليق بعد المسافة
+                line = line[:40].rstrip()  # إزالة التعليق، أخذ الجزء قبل 40
+            else:
+                comment = ""
+            # Don't write LOCCTR for START
+            if comment:
+                intermediateFile.write("     " + line[:40] + "\n")
+            else:
+                intermediateFile.write("     " + line[:40])
         # ? ========{OPCODE}========
 
         # ? ========{OPERAND}========
