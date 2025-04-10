@@ -44,7 +44,7 @@ for line in sicFile:
         # from 1 to 10 -> LABEL
         label = line[0:10].strip()
         if labelMap.get(label) != None:
-            error = "Symbol " + str(label) + " already exist in symbol table\n"
+            error = "Symbol " + str(label) + " already exists in the symbol table\n"
             flagErrors(error, "withLine", lineNumber)
         # ? ========{LABEL}========
 
@@ -54,7 +54,7 @@ for line in sicFile:
         if isFirstLine == True:
             isFirstLine = False
             if opCode != "START":
-                error = "The program must begin with START directive"
+                error = "The program must begin with the START directive"
                 flagErrors(error, "withoutLine", lineNumber)
         if opCode == "START":
             isSTART = True
@@ -68,8 +68,20 @@ for line in sicFile:
         elif opCode == "RESW":
             isRESW = True
 
-        # write the line on list file
-        intermediateFile.write(line)
+        if opCode != "START":
+            # ? ========{COMMENTS}========
+            if len(line) > 39:
+                comment = line[40:].strip()  # استخراج التعليق بعد المسافة
+                line = line[:40].rstrip()  # إزالة التعليق، أخذ الجزء قبل 40
+            else:
+                comment = ""
+            # ? ========{COMMENTS}========
+
+            # Write the formatted line without comments into intermediate file
+            intermediateFile.write(f"{LOCCTR.zfill(4)}  {line}\n")
+        else:
+            # Don't write LOCCTR for START
+            intermediateFile.write("      " + line[:40] + "\n")
 
         if opCode == "END":
             intermediateFile.write("\n")
@@ -95,10 +107,9 @@ for line in sicFile:
         # ? ========{BYTE directive}========
         elif isBYTE:
             value = operand[2 : len(operand) - 1]
-            # C' ' -> c' : [0] [1], this mean why start from 2
             convertedValue = ""
             if operand == "":
-                error = "Directive " + opCode + " need an operand\n"
+                error = "Directive " + opCode + " needs an operand\n"
                 flagErrors(error, "withLine", lineNumber)
             elif operand.startswith("C"):
                 for ch in value:
@@ -117,7 +128,7 @@ for line in sicFile:
             value = operand[2 : len(operand) - 1]
             convertedValue = ""
             if operand == "":
-                error = "Directive " + opCode + " need an operand\n"
+                error = "Directive " + opCode + " needs an operand\n"
                 flagErrors(error, "withLine", lineNumber)
             elif operand.startswith("C"):
                 for ch in value:
@@ -136,7 +147,7 @@ for line in sicFile:
         # ? ========{RESB directive}========
         elif isRESB:
             if operand == "":
-                error = "Directive " + opCode + " need an operand\n"
+                error = "Directive " + opCode + " needs an operand\n"
                 flagErrors(error, "withLine", lineNumber)
             instructionSize = hex(int(operand)).lstrip("0x").upper()
         # ? ========{RESB directive}========
@@ -144,7 +155,7 @@ for line in sicFile:
         # ? ========{RESW directive}========
         elif isRESW:
             if operand == "":
-                error = "Directive " + opCode + " need an operand\n"
+                error = "Directive " + opCode + " needs an operand\n"
                 flagErrors(error, "withLine", lineNumber)
             instructionSize = hex(int(operand) * 3).lstrip("0x").upper()
         # ? ========{RESW directive}========
@@ -158,7 +169,7 @@ for line in sicFile:
 sicFile.close()
 intermediateFile.close()
 
-PRGLTH = hex(int(LOCCTR, 16) - int(startAddress, 16)).lstrip("0x").upper()
+PRGLTH = hex(int(LOCCTR, 16) - int(startAddress, 16) - 3).lstrip("0x").upper()
 
 whiteBold = "\033[1;37m"
 blueLight = "\033[1;38;5;85m"

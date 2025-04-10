@@ -22,30 +22,30 @@ BUFFER     RESB      4096               Reserve a 4096-byte buffer
 .                   
 .          SUBROUTINE TO READ RECORD INTO BUFFER
 .                  
-RDREC      LDX       ZERO                Load zero into index register X
-           LDA       ZERO                Load zero into accumulator A
-RLOOP      TD        INPUT               Test if input device is ready
-           JEQ       RLOOP               If not ready, repeat the loop
-           RD        INPUT               Read from the input device
-           COMP      ZERO                Compare the read data with zero
-           JEQ       EXIT                If zero, exit the loop
-           STCH      BUFFER, X           Store character in buffer at index X
-           TIX       MAXLEN              Increment index register X
-           JLT       RLOOP               If less than MAXLEN, repeat the loop
-EXIT       STX       LENGTH              Store the final index (length) in LENGTH
-           RSUB                          Return from the subroutine
-INPUT      BYTE      X'F1'               Define input device address
-MAXLEN     WORD      4096                Define maximum length of record
+RDREC      LDX       ZERO               Load zero into index register X
+           LDA       ZERO               Load zero into accumulator A
+RLOOP      TD        INPUT              Test if input device is ready
+           JEQ       RLOOP              If not ready, repeat the loop
+           RD        INPUT              Read from the input device
+           COMP      ZERO               Compare the read data with zero
+           JEQ       EXIT               If zero, exit the loop
+           STCH      BUFFER, X          Store character in buffer at index X
+           TIX       MAXLEN             Increment index register X
+           JLT       RLOOP              If less than MAXLEN, repeat the loop
+EXIT       STX       LENGTH             Store the final index (length) in LENGTH
+           RSUB                         Return from the subroutine
+INPUT      BYTE      X'F1'              Define input device address
+MAXLEN     WORD      4096               Define maximum length of record
 .                      
 .          SUBROUTINE TO WRITE RECORD FROM BUFFER
 .                  
-WRREC      LDX       ZERO                Load zero into index register X
-WLOOP      TD        OUTPUT              Test if output device is ready
-           JEQ       WLOOP               If not ready, repeat the loop
-           LDCH      BUFFER, X           Load character from buffer at index X
-           WD        OUTPUT              Write character to the output device
-           TIX       LENGTH              Increment index register X
-           JLT       WLOOP               If less than LENGTH, repeat the loop
-           RSUB                          Return from the subroutine
-OUTPUT     BYTE      X'50'               Define output device address
-           END       FIRST               End of the program
+WRREC      LDX       ZERO               Load zero into index register X
+WLOOP      TD        OUTPUT             Test if output device is ready
+           JEQ       WLOOP              If not ready, repeat the loop
+           LDCH      BUFFER, X          Load character from buffer at index X
+           WD        OUTPUT             Write character to the output device
+           TIX       LENGTH             Increment index register X
+           JLT       WLOOP              If less than LENGTH, repeat the loop
+           RSUB                         Return from the subroutine
+OUTPUT     BYTE      X'50'              Define output device address
+           END       COPY               End of the program

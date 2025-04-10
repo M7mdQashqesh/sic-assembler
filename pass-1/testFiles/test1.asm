@@ -10,4 +10,4 @@ TABLE      RESW      2000
 COUNT      RESW      1
 ZERO       WORD      0
 TOTAL      RESW      1
-           END       FIRST
+           END       SUM
