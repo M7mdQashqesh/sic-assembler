@@ -1,3 +1,10 @@
+"""
+Course Project -- Pass1
+
+Name: Mohammed Qashqesh
+id: 211014
+"""
+
 import sys
 import os
 import math
