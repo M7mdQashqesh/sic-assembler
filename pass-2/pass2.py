@@ -44,7 +44,6 @@ for line in intermediateFile:
     isRESB = False
     isRESW = False
     isSTART = False
-    isLITRAL = False
     isEND = False
     isINDEXED = False
     instructionSize = "3"  # SIC
@@ -75,8 +74,6 @@ for line in intermediateFile:
         isRESW = True
     elif opCode == "END":
         isEND = True
-    elif label == "*":
-        isLITRAL = 1
     elif FORMAT3.get(opCode) == None:
         error = "opCode " + str(opCode) + " doesn't exists!\n"
         flagErrors(error, "withLine", lineNumber)
@@ -93,7 +90,7 @@ for line in intermediateFile:
         instructionSize = hex(int(operand)).lstrip("0x")
     elif isSTART:
         LOCCTR = StartAddress
-        isSTART = 0
+        isSTART = 1
         LOCCTR = ("0" * (4 - len(LOCCTR))) + LOCCTR
         line = line.replace("\n", "")
         listingFile.write(line[0:35] + "\t" + "\n")
